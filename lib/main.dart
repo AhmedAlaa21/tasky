@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Tasky',
       theme: ThemeData(useMaterial3: true),
-      home: const WelcomeScreen(),
+      home: WelcomeScreen(),
     );
   }
 }
