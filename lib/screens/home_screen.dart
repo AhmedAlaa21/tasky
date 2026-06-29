@@ -1,7 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? username = "Guest";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsername();
+  }
+
+  void _loadUsername() async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      username = pref.getString('username') ?? "Guest";
+    });
+  }
+
+  String _getGreeting() {
+    final int hour = DateTime.now().hour;
+    print('time now is $hour');
+
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    if (hour < 21) return "Good Evening";
+    return "Good Night";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,26 +57,28 @@ class HomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Good Evening ,Usama",
+                            "${_getGreeting()}, $username",
                             style: TextStyle(
                               color: Color(0xFFFFFCFC),
                               fontWeight: FontWeight.w400,
                             ),
                           ),
                           Text(
-                            "One task at a time.One step\n closer.",
+                            "One task at a time. One step\n closer.",
                             style: TextStyle(
                               color: Color(0xFFC6C6C6),
                               fontWeight: FontWeight.w400,
-                              fontSize: 14
+                              fontSize: 14,
                             ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  Text("button here..",
-                  style: TextStyle(color: Colors.white),)
+                  Text(
+                    "button here..",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ],
               ),
             ],

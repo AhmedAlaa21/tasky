@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_app/screens/home_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -116,9 +117,11 @@ class WelcomeScreen extends StatelessWidget {
                           .size
                           .width,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (_key.currentState?.validate() ?? false) {
-                            Navigator.push(
+                            final pref = await SharedPreferences.getInstance();
+                            await pref.setString("username", textEditingController.value.text);
+                            Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (BuildContext context) {
