@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo_app/models/task_model.dart';
+import 'package:todo_app/screens/home_screen.dart';
 
 class AddNewTaskScreen extends StatefulWidget {
   const AddNewTaskScreen({super.key});
@@ -17,7 +19,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   final TextEditingController taskNameController = TextEditingController();
 
   final TextEditingController taskDescriptionController =
-      TextEditingController();
+  TextEditingController();
 
   bool isHighPriority = true;
 
@@ -55,6 +57,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                         SizedBox(height: 8),
                         TextFormField(
                           controller: taskNameController,
+                          style: TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             hintText: "Finish UI design for login screen",
                             hintStyle: TextStyle(color: Color(0xFF6D6D6D)),
@@ -66,7 +69,9 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                             ),
                           ),
                           validator: (String? value) {
-                            if (value == null || value.trim().isEmpty) {
+                            if (value == null || value
+                                .trim()
+                                .isEmpty) {
                               return "Please Enter Task Name";
                             }
                             return null;
@@ -83,10 +88,11 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                         ),
                         SizedBox(height: 8),
                         TextFormField(
-                          controller: taskNameController,
+                          controller: taskDescriptionController,
+                          style: TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             hintText:
-                                "Finish onboarding UI and hand off to devs by Thursday.",
+                            "Finish onboarding UI and hand off to devs by Thursday.",
                             hintStyle: TextStyle(color: Color(0xFF6D6D6D)),
                             filled: true,
                             fillColor: Color(0xFF282828),
@@ -97,7 +103,9 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                           ),
                           maxLines: 5,
                           validator: (String? value) {
-                            if (value == null || value.trim().isEmpty) {
+                            if (value == null || value
+                                .trim()
+                                .isEmpty) {
                               return "Please Enter task description";
                             }
                             return null;
@@ -136,13 +144,35 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                   label: Text("Add Task"),
                   onPressed: () async {
                     if (_key.currentState?.validate() ?? false) {
-                      final newTask = <String, dynamic>{
-                        "taskName": taskNameController.text,
-                        "taskDescription": taskDescriptionController.text,
-                        "isHighPriority": isHighPriority,
-                      };
+                      TaskModel model = TaskModel(
+                          taskName: taskNameController.text,
+                          taskDescription: taskDescriptionController.text,
+                          isHighPriority: isHighPriority);
+
                       final pref = await SharedPreferences.getInstance();
-                      await pref.setString("newTask", jsonEncode(newTask));
+
+                      // get all previous tasks.
+                      final previousTasks = pref.getString('tasks');
+
+                      List<dynamic> tasksList = [];
+                      if (previousTasks != null) {
+                        tasksList =
+                        jsonDecode(previousTasks);
+                      }
+
+                      tasksList.add(model.toJson());
+                      await pref.setString("tasks", jsonEncode(tasksList));
+                      print(tasksList);
+                      if (context.mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return HomeScreen();
+                            },
+                          ),
+                        );
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -151,7 +181,10 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    fixedSize: Size(MediaQuery.of(context).size.width, 40),
+                    fixedSize: Size(MediaQuery
+                        .of(context)
+                        .size
+                        .width, 40),
                   ),
                 ),
               ],
